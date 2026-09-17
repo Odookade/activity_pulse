@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_store_receipt" model="ir.actions.report">
+        <field name="name">رسید سفارش فروشگاه</field>
+        <field name="model">activity.pulse.store.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">activity_pulse.store_receipt_document</field>
+        <field name="report_file">activity_pulse.store_receipt_document</field>
+        <field name="print_report_name">'رسید سفارش - %s' % (object.item_name or '')</field>
+        <field name="binding_model_id" ref="model_activity_pulse_store_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="store_receipt_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl" style="text-align: right;">
+                        <h2>رسید تحویل سفارش</h2>
+                        <p class="text-muted">
+                            این سند به‌عنوان مدرک تحویل سفارش از فروشگاه پایش اکتیویتی صادر شده است.
+                        </p>
+
+                        <table class="table table-sm o_ap_receipt_table" style="width: 100%; margin-top: 16px;">
+                            <tr>
+                                <td style="width: 35%;"><strong>شماره رسید</strong></td>
+                                <td t-esc="'AP-%06d' % o.id"/>
+                            </tr>
+                            <tr>
+                                <td><strong>خریدار</strong></td>
+                                <td t-esc="o.user_id.name"/>
+                            </tr>
+                            <tr>
+                                <td><strong>آیتم</strong></td>
+                                <td t-esc="o.item_name"/>
+                            </tr>
+                            <tr>
+                                <td><strong>مبلغ پرداخت‌شده</strong></td>
+                                <td>
+                                    <span t-esc="o.price_paid"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>تاریخ خرید</strong></td>
+                                <td><span t-field="o.create_date"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>تاریخ تحویل</strong></td>
+                                <td><span t-field="o.decision_date"/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>تحویل توسط</strong></td>
+                                <td t-esc="o.fulfilled_by.name or '—'"/>
+                            </tr>
+                            <tr t-if="o.note">
+                                <td><strong>یادداشت</strong></td>
+                                <td t-esc="o.note"/>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

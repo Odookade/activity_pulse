@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_activity_pulse_panel" model="ir.actions.client">
+        <field name="name">پایش اکتیویتی</field>
+        <field name="tag">activity_pulse.panel</field>
+    </record>
+
+    <menuitem id="menu_activity_pulse_root"
+              name="پایش اکتیویتی"
+              sequence="45"
+              action="action_activity_pulse_panel"
+              web_icon="activity_pulse,static/description/icon.png"/>
+
+</odoo>

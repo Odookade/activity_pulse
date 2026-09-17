@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_activity_pulse" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.activity.pulse</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <div class="app_settings_block" data-string="پایش اکتیویتی"
+                     string="پایش اکتیویتی" data-key="activity_pulse">
+                    <h2>اتصال پیامکی کاوه‌نگار</h2>
+                    <div class="row mt16 o_settings_container" id="activity_pulse_kavenegar">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_kavenegar_api_key" string="کلید API کاوه‌نگار"/>
+                                <div class="text-muted">
+                                    از پنل kavenegar.com دریافت می‌شود.
+                                </div>
+                                <field name="activity_pulse_kavenegar_api_key"
+                                       placeholder="کلید API خود را اینجا وارد کنید"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_kavenegar_template" string="نام الگو (Template)"/>
+                                <div class="text-muted">
+                                    نام الگوی از پیش تأییدشده در پنل کاوه‌نگار (سرویس Lookup).
+                                </div>
+                                <field name="activity_pulse_kavenegar_template"
+                                       placeholder="odooactivty"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>ماژول‌های مستثنا</h2>
+                    <div class="row mt16 o_settings_container" id="activity_pulse_excluded_models">
+                        <div class="col-12 col-lg-8 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_excluded_model_ids" string="این ماژول‌ها حساب نشوند"/>
+                                <div class="text-muted">
+                                    اکتیویتی‌های مربوط به مدل‌هایی که اینجا اضافه می‌کنید، اصلاً وارد
+                                    داشبورد/تاریخچه/بررسی کیفیت پایش اکتیویتی نمی‌شن و هیچ نوتیفی
+                                    (تأیید کیفیت و غیره) براشون ارسال نمی‌شه.
+                                </div>
+                                <field name="activity_pulse_excluded_model_ids"
+                                       widget="many2many_tags"
+                                       placeholder="مثلاً: Lead/Opportunity، Task..."/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>ارز سازمانی</h2>
+                    <div class="row mt16 o_settings_container" id="activity_pulse_currency">
+                        <div class="col-12 col-lg-4 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_currency_name" string="نام ارز"/>
+                                <div class="text-muted">مثلاً «ایرکس‌کوین»</div>
+                                <field name="activity_pulse_currency_name" placeholder="سکه"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_currency_icon" string="آیکون ارز"/>
+                                <div class="text-muted">یک اموجی یا نماد کوتاه</div>
+                                <field name="activity_pulse_currency_icon" placeholder="🪙"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="activity_pulse_coins_per_activity" string="پاداش پیش‌فرض هر اکتیویتی"/>
+                                <div class="text-muted">قابل تغییر توسط مدیر موقع تأیید هر پاداش</div>
+                                <field name="activity_pulse_coins_per_activity"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
