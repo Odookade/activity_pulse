@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_activity_pulse_category_list" model="ir.ui.view">
+        <field name="name">activity.pulse.category.list</field>
+        <field name="model">activity.pulse.category</field>
+        <field name="arch" type="xml">
+            <list string="دسته‌بندی‌ها">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="member_count" string="تعداد اعضا"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_activity_pulse_category_form" model="ir.ui.view">
+        <field name="name">activity.pulse.category.form</field>
+        <field name="model">activity.pulse.category</field>
+        <field name="arch" type="xml">
+            <form string="دسته‌بندی">
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="مثلاً: فروش، پشتیبانی، تولید محتوا..."/>
+                        <field name="sequence"/>
+                    </group>
+                    <group string="اعضای این دسته">
+                        <field name="user_ids" widget="many2many_tags" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_activity_pulse_category" model="ir.actions.act_window">
+        <field name="name">دسته‌بندی کاربران</field>
+        <field name="res_model">activity.pulse.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nodata_smiling_face">هنوز دسته‌بندی‌ای نساختید</p>
+            <p>با دسته‌بندی کردن کارمندان (مثلاً بر اساس تیم یا واحد)، پیدا کردنشون
+               توی گرید پنل راحت‌تر می‌شه.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_activity_pulse_category"
+              name="دسته‌بندی کاربران"
+              parent="menu_activity_pulse_root"
+              action="action_activity_pulse_category"
+              sequence="20"/>
+
+</odoo>
