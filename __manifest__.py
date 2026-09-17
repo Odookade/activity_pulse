@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Activity Pulse - پایش اکتیویتی',
-    'version': '18.0.1.0.0',
+    'version': '18.0.3.1.2',
     'category': 'Productivity',
     'summary': 'ویجت داشبورد شیک برای نمایش و مدیریت اکتیویتی‌های کاربران در صفحه اصلی اودو',
     'description': """
