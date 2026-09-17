@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="activity_pulse.JalaliDateInput">
+        <div class="o_ap_jalali_date_input" dir="rtl">
+            <select class="o_ap_jdi_day" t-on-change="onDayChange">
+                <t t-foreach="days" t-as="d" t-key="d">
+                    <option t-att-value="d" t-att-selected="state.jd === d" t-esc="d"/>
+                </t>
+            </select>
+            <select class="o_ap_jdi_month" t-on-change="onMonthChange">
+                <t t-foreach="months" t-as="mName" t-key="mName_index">
+                    <option t-att-value="mName_index + 1"
+                            t-att-selected="state.jm === mName_index + 1"
+                            t-esc="mName"/>
+                </t>
+            </select>
+            <select class="o_ap_jdi_year" t-on-change="onYearChange">
+                <t t-foreach="years" t-as="y" t-key="y">
+                    <option t-att-value="y" t-att-selected="state.jy === y" t-esc="y"/>
+                </t>
+            </select>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-inherit="web_enterprise.HomeMenu" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_home_menu')]/*[1]" position="before">
+            <ActivityDashboardWidget/>
+        </xpath>
+    </t>
+</templates>

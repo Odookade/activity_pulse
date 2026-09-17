@@ -1,0 +1,834 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="activity_pulse.Panel">
+        <div class="o_activity_pulse_panel" dir="rtl">
+
+            <div class="o_app_header">
+                <div class="o_app_title">
+                    <i class="fa fa-tasks"/>
+                    <t t-if="state.view === 'grid'">پایش اکتیویتی تیم</t>
+                    <t t-elif="state.view === 'history'">
+                        تاریخچه <t t-esc="state.selectedUser.name"/>
+                    </t>
+                    <t t-elif="state.view === 'cancelled'">
+                        فعالیت‌های لغوشده <t t-esc="state.selectedUser.name"/>
+                    </t>
+                    <t t-elif="state.view === 'approvals'">درخواست‌های تمدید موعد</t>
+                    <t t-elif="state.view === 'quality_reviews'">بررسی کیفیت انجام کار</t>
+                    <t t-elif="state.view === 'rewards'">تأیید پاداش‌ها</t>
+                    <t t-elif="state.view === 'store'">فروشگاه</t>
+                    <t t-elif="state.view === 'store_orders'">سفارش‌های فروشگاه</t>
+                    <t t-elif="state.view === 'my_orders'">سفارش‌های من</t>
+                    <t t-elif="state.isManager">
+                        اکتیویتی‌های <t t-esc="state.selectedUser.name"/>
+                    </t>
+                    <t t-else="">اکتیویتی‌های من</t>
+                </div>
+
+                <t t-if="state.wallet">
+                    <div class="o_ap_wallet_badge" t-on-click="showStore" title="فروشگاه">
+                        <span class="o_ap_wallet_icon" t-esc="state.wallet.currency_icon"/>
+                        <span class="o_ap_wallet_balance" t-esc="state.wallet.balance"/>
+                        <span class="o_ap_wallet_name" t-esc="state.wallet.currency_name"/>
+                    </div>
+                </t>
+
+                <div class="o_app_header_actions">
+                    <t t-if="!this._isAuxiliaryView(state.view)">
+                        <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showStore">
+                            <i class="fa fa-shopping-cart"/> فروشگاه
+                        </button>
+                        <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showMyOrders">
+                            <i class="fa fa-file-text-o"/> سفارش‌های من
+                        </button>
+                        <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showApprovals">
+                            <i class="fa fa-bell"/> درخواست‌های تمدید
+                            <t t-if="state.pendingApprovalsCount > 0">
+                                <span class="o_ap_approvals_badge" t-esc="state.pendingApprovalsCount"/>
+                            </t>
+                        </button>
+                        <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showQualityReviews">
+                            <i class="fa fa-star-o"/> بررسی کیفیت انجام کار
+                            <t t-if="state.pendingQualityCount > 0">
+                                <span class="o_ap_approvals_badge" t-esc="state.pendingQualityCount"/>
+                            </t>
+                        </button>
+                        <t t-if="state.isManager">
+                            <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showRewards">
+                                <i class="fa fa-gift"/> تأیید پاداش‌ها
+                                <t t-if="state.pendingRewardsCount > 0">
+                                    <span class="o_ap_approvals_badge" t-esc="state.pendingRewardsCount"/>
+                                </t>
+                            </button>
+                            <button class="o_app_back_btn o_app_approvals_btn" t-on-click="showStoreOrders">
+                                <i class="fa fa-truck"/> سفارش‌های فروشگاه
+                                <t t-if="state.pendingOrdersCount > 0">
+                                    <span class="o_ap_approvals_badge" t-esc="state.pendingOrdersCount"/>
+                                </t>
+                            </button>
+                            <button class="o_app_back_btn o_app_approvals_btn" t-on-click="openManualDeposit">
+                                <i class="fa fa-money"/> واریز سکه به کاربر
+                            </button>
+                        </t>
+                    </t>
+                    <t t-if="this._isAuxiliaryView(state.view)">
+                        <button class="o_app_back_btn" t-on-click="backFromApprovals">
+                            <i class="fa fa-arrow-right"/> بازگشت
+                        </button>
+                    </t>
+                    <t t-if="state.view === 'detail'">
+                        <button class="o_app_back_btn" t-on-click="showHistory">
+                            <i class="fa fa-history"/> تاریخچه و بهره‌وری
+                        </button>
+                        <button class="o_app_back_btn" t-on-click="showCancelled">
+                            <i class="fa fa-ban"/> فعالیت‌های لغوشده
+                        </button>
+                    </t>
+                    <t t-if="state.view === 'history' || state.view === 'cancelled'">
+                        <button class="o_app_back_btn" t-on-click="backToDetail">
+                            <i class="fa fa-arrow-right"/> بازگشت به لیست اکتیویتی
+                        </button>
+                    </t>
+                    <t t-if="state.view === 'detail' &amp;&amp; state.isManager">
+                        <button class="o_app_back_btn" t-on-click="backToGrid">
+                            <i class="fa fa-arrow-right"/> بازگشت به لیست تیم
+                        </button>
+                    </t>
+                </div>
+            </div>
+
+            <t t-if="state.loading">
+                <div class="o_ap_panel_loading">
+                    <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'grid'">
+                <div class="o_ap_category_toolbar">
+                    <div class="o_ap_category_tabs">
+                        <button t-attf-class="o_ap_cat_tab {{ state.categoryFilter === 'all' ? 'active' : '' }}"
+                                t-on-click="() => this.setCategoryFilter('all')">
+                            همه (<t t-esc="state.team.length"/>)
+                        </button>
+                        <t t-foreach="state.teamCategories" t-as="cat" t-key="cat.id">
+                            <button t-attf-class="o_ap_cat_tab {{ state.categoryFilter === cat.id ? 'active' : '' }}"
+                                    t-on-click="() => this.setCategoryFilter(cat.id)">
+                                <t t-esc="cat.name"/>
+                            </button>
+                        </t>
+                        <button t-attf-class="o_ap_cat_tab {{ state.categoryFilter === 'uncategorized' ? 'active' : '' }}"
+                                t-on-click="() => this.setCategoryFilter('uncategorized')">
+                            بدون دسته
+                        </button>
+                    </div>
+                    <div class="o_ap_toolbar_actions">
+                        <div class="o_ap_search_box">
+                            <i class="fa fa-search"/>
+                            <input type="text"
+                                   placeholder="جستجوی کارمند..."
+                                   t-att-value="state.teamSearchQuery"
+                                   t-on-input="onTeamSearchInput"/>
+                            <t t-if="state.teamSearchQuery">
+                                <i class="fa fa-times-circle o_ap_search_clear" t-on-click="() => this.state.teamSearchQuery = ''"/>
+                            </t>
+                        </div>
+                        <button class="o_ap_manage_categories_btn" t-on-click="openCategoryManager">
+                            <i class="fa fa-cog"/> مدیریت دسته‌بندی‌ها
+                        </button>
+                    </div>
+                </div>
+
+                <t t-if="!filteredTeam.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-users"/> کاربری در این دسته‌بندی یافت نشد
+                    </div>
+                </t>
+                <div class="o_ap_team_grid">
+                    <t t-foreach="filteredTeam" t-as="member" t-key="member.user_id">
+                        <div class="o_ap_member_card" t-on-click="() => this.openUser(member)">
+                            <div class="o_ap_member_avatar" t-esc="member.user_name.charAt(0)"/>
+                            <div class="o_ap_member_name" t-esc="member.user_name"/>
+                            <div class="o_ap_member_badges">
+                                <span class="o_ap_badge o_ap_badge_red">
+                                    <i class="fa fa-exclamation-circle"/> <t t-esc="member.red"/>
+                                </span>
+                                <span class="o_ap_badge o_ap_badge_yellow">
+                                    <i class="fa fa-clock-o"/> <t t-esc="member.yellow"/>
+                                </span>
+                                <span class="o_ap_badge o_ap_badge_green">
+                                    <i class="fa fa-calendar"/> <t t-esc="member.green"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'detail'">
+                <div class="o_ap_kpi_dashboard">
+                    <div class="o_ap_kpi_toolbar">
+                        <div class="o_ap_kpi_period_toggle">
+                            <button t-attf-class="o_ap_period_btn {{ state.kpiPeriodType === 'month' ? 'active' : '' }}"
+                                    t-on-click="() => this.onKpiPeriodTypeChange('month')">
+                                این ماه
+                            </button>
+                            <button t-attf-class="o_ap_period_btn {{ state.kpiPeriodType === 'year' ? 'active' : '' }}"
+                                    t-on-click="() => this.onKpiPeriodTypeChange('year')">
+                                امسال
+                            </button>
+                        </div>
+                        <div class="o_ap_kpi_selectors">
+                            <t t-if="state.kpiPeriodType === 'month'">
+                                <select t-on-change="onKpiMonthChange">
+                                    <t t-foreach="persianMonths" t-as="mName" t-key="mName_index">
+                                        <option t-att-value="mName_index + 1"
+                                                t-att-selected="state.kpiMonth === mName_index + 1"
+                                                t-esc="mName"/>
+                                    </t>
+                                </select>
+                            </t>
+                            <select t-on-change="onKpiYearChange">
+                                <t t-foreach="kpiYearOptions" t-as="y" t-key="y">
+                                    <option t-att-value="y" t-att-selected="state.kpiYear === y" t-esc="y"/>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+
+                    <t t-if="state.kpiLoading || !state.kpi">
+                        <div class="o_ap_kpi_loading">
+                            <i class="fa fa-circle-o-notch fa-spin"/> در حال محاسبه گزارش...
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="o_ap_kpi_cards">
+                            <div class="o_ap_kpi_card">
+                                <div class="o_ap_kpi_value" t-esc="state.kpi.completed_count"/>
+                                <div class="o_ap_kpi_label">فعالیت انجام‌شده در <t t-esc="state.kpi.period_label"/></div>
+                            </div>
+                            <div t-attf-class="o_ap_kpi_card {{ state.kpi.average_delay_days > 0 ? 'o_ap_kpi_bad' : (state.kpi.average_delay_days &lt; 0 ? 'o_ap_kpi_good' : '') }}">
+                                <div class="o_ap_kpi_value">
+                                    <t t-if="state.kpi.average_delay_days > 0">+<t t-esc="state.kpi.average_delay_days"/></t>
+                                    <t t-else="" t-esc="state.kpi.average_delay_days"/>
+                                </div>
+                                <div class="o_ap_kpi_label">میانگین روز تاخیر/زودتر</div>
+                            </div>
+                            <div t-attf-class="o_ap_kpi_card {{ state.kpi.on_time_rate >= 70 ? 'o_ap_kpi_good' : (state.kpi.on_time_rate &lt; 40 ? 'o_ap_kpi_bad' : '') }}">
+                                <div class="o_ap_kpi_value"><t t-esc="state.kpi.on_time_rate"/>%</div>
+                                <div class="o_ap_kpi_label">نرخ انجام به‌موقع</div>
+                            </div>
+                            <div class="o_ap_kpi_card">
+                                <div class="o_ap_kpi_value o_ap_kpi_mini_badges">
+                                    <span class="o_ap_badge o_ap_badge_red"><t t-esc="state.kpi.open_red"/></span>
+                                    <span class="o_ap_badge o_ap_badge_yellow"><t t-esc="state.kpi.open_yellow"/></span>
+                                    <span class="o_ap_badge o_ap_badge_green"><t t-esc="state.kpi.open_green"/></span>
+                                </div>
+                                <div class="o_ap_kpi_label">وضعیت فعلیِ فعالیت‌های باز</div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <t t-if="state.detailLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.activities.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> این کاربر هیچ اکتیویتی بازی ندارد
+                    </div>
+                </t>
+                <div class="o_ap_detail_list" t-else="">
+                    <t t-foreach="state.activities" t-as="activity" t-key="activity.id">
+                        <div t-attf-class="o_ap_detail_row o_ap_row_{{activity.color}}">
+                            <div class="o_ap_detail_main" t-on-click="() => this.openRecord(activity)">
+                                <div class="o_ap_detail_title">
+                                    <span class="o_ap_dot"/>
+                                    <span t-esc="activity.res_name"/>
+                                    <span class="o_ap_detail_type" t-esc="activity.activity_type"/>
+                                </div>
+                                <div class="o_ap_detail_summary" t-esc="activity.summary"/>
+                            </div>
+
+                            <div class="o_ap_detail_meta" dir="rtl">
+                                <div class="o_ap_deadline_edit">
+                                    <label>موعد:</label>
+                                    <t t-if="activity.can_edit">
+                                        <JalaliDateInput
+                                            value="activity.date_deadline"
+                                            onChange="(newDate) => this.onDeadlineChange(activity, newDate)"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="o_ap_deadline_readonly" t-esc="activity.date_deadline_jalali"/>
+                                    </t>
+                                </div>
+                                <t t-if="activity.delay_days &gt; 0">
+                                    <span class="o_ap_delay_tag" dir="rtl">
+                                        <t t-esc="activity.delay_days"/> روز تاخیر
+                                    </span>
+                                </t>
+                                <t t-if="activity.had_extension">
+                                    <span class="o_ap_extended_tag" dir="rtl" title="این اکتیویتی با دلیل موجه تمدید شده">
+                                        <i class="fa fa-refresh"/> تمدیدشده (<t t-esc="activity.extension_days"/> روز)
+                                    </span>
+                                </t>
+                            </div>
+
+                            <div class="o_ap_detail_actions">
+                                <button class="o_ap_act_btn o_ap_act_done"
+                                        title="انجام شد"
+                                        t-on-click="(ev) => this.markDone(activity, ev)">
+                                    <i class="fa fa-check"/> انجام شد
+                                </button>
+                                <t t-if="!activity.can_edit">
+                                    <t t-if="activity.has_pending_extension_request">
+                                        <span class="o_ap_pending_ext_tag" dir="rtl">
+                                            <i class="fa fa-clock-o"/> درخواست تمدید در انتظار بررسی
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <button class="o_ap_act_btn o_ap_act_extend"
+                                                title="درخواست زمان اضافه"
+                                                t-on-click="(ev) => this.requestExtension(activity, ev)">
+                                            <i class="fa fa-hourglass-half"/> درخواست زمان اضافه
+                                        </button>
+                                    </t>
+                                </t>
+                                <t t-if="state.isManager">
+                                    <button class="o_ap_act_btn o_ap_act_followup"
+                                            title="ارسال پیگیری در Discuss"
+                                            t-on-click="(ev) => this.followUp(activity, ev)">
+                                        <i class="fa fa-comment-o"/> پیگیری
+                                    </button>
+                                    <button class="o_ap_act_btn o_ap_act_sms"
+                                            title="ارسال پیامک از طریق کاوه‌نگار"
+                                            t-on-click="(ev) => this.sendSms(activity, ev)">
+                                        <i class="fa fa-mobile"/> پیامک
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'history'">
+                <t t-if="state.historyLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.historyData.count">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-info-circle"/> هنوز هیچ اکتیویتی انجام‌شده‌ای برای این کاربر ثبت نشده است
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="o_ap_history_summary">
+                        <div class="o_ap_history_avg"
+                             t-attf-class="o_ap_history_avg {{ state.historyData.average_delay_days > 0 ? 'o_ap_avg_late' : (state.historyData.average_delay_days &lt; 0 ? 'o_ap_avg_early' : 'o_ap_avg_ontime') }}">
+                            <t t-if="state.historyData.average_delay_days > 0">
+                                میانگین <t t-esc="state.historyData.average_delay_days"/> روز تاخیر
+                            </t>
+                            <t t-elif="state.historyData.average_delay_days &lt; 0">
+                                میانگین <t t-esc="Math.abs(state.historyData.average_delay_days)"/> روز زودتر از موعد
+                            </t>
+                            <t t-else="">به‌طور میانگین دقیقاً سرِ موعد</t>
+                        </div>
+                        <div class="o_ap_history_count">
+                            از <t t-esc="state.historyData.count"/> اکتیویتی انجام‌شده
+                        </div>
+                    </div>
+
+                    <div class="o_ap_history_list">
+                        <t t-foreach="state.historyData.history" t-as="item" t-key="item.id">
+                            <div t-attf-class="o_ap_history_row {{ item.quality_rejected ? 'o_ap_hrow_quality_rejected' : (item.delay_days > 0 ? 'o_ap_hrow_late' : (item.delay_days &lt; 0 ? 'o_ap_hrow_early' : 'o_ap_hrow_ontime')) }}"
+                                 dir="rtl"
+                                 t-on-click="() => this.openRecord(item)">
+                                <div class="o_ap_history_main">
+                                    <span t-esc="item.res_name"/>
+                                    <span class="o_ap_history_type" t-esc="item.activity_type"/>
+                                </div>
+                                <t t-if="item.summary">
+                                    <div class="o_ap_history_summary" t-esc="item.summary"/>
+                                </t>
+                                <div class="o_ap_history_dates">
+                                    <span>موعد: <t t-esc="item.original_deadline_jalali"/></span>
+                                    <span>انجام: <t t-esc="item.completion_date_jalali"/></span>
+                                </div>
+                                <div class="o_ap_history_tag">
+                                    <t t-if="item.delay_days > 0">
+                                        <t t-esc="item.delay_days"/> روز تاخیر
+                                    </t>
+                                    <t t-elif="item.delay_days &lt; 0">
+                                        <t t-esc="Math.abs(item.delay_days)"/> روز زودتر
+                                    </t>
+                                    <t t-else="">سرِ موعد</t>
+                                </div>
+                                <t t-if="item.had_extension">
+                                    <div class="o_ap_history_ext_note" dir="rtl">
+                                        <i class="fa fa-refresh"/>
+                                        <t t-esc="item.extension_days"/> روز با دلیل موجه تمدید شد:
+                                        «<t t-esc="item.extension_reason"/>»
+                                    </div>
+                                </t>
+                                <t t-if="item.quality_rejected">
+                                    <div class="o_ap_history_quality_note" dir="rtl">
+                                        <i class="fa fa-star-o"/> ردشده توسط محول‌کننده
+                                        <t t-if="item.quality_rejection_reason">
+                                            — «<t t-esc="item.quality_rejection_reason"/>»
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+
+            <t t-elif="state.view === 'cancelled'">
+                <t t-if="state.cancelledLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.cancelledData.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> هیچ اکتیویتی لغوشده‌ای برای این کاربر ثبت نشده است
+                    </div>
+                </t>
+                <div class="o_ap_history_list" t-else="">
+                    <t t-foreach="state.cancelledData" t-as="item" t-key="item.id">
+                        <div class="o_ap_history_row o_ap_hrow_late" dir="rtl" t-on-click="() => this.openRecord(item)">
+                            <div class="o_ap_history_main">
+                                <span t-esc="item.res_name"/>
+                                <span class="o_ap_history_type" t-esc="item.activity_type"/>
+                            </div>
+                            <t t-if="item.summary">
+                                <div class="o_ap_history_summary" t-esc="item.summary"/>
+                            </t>
+                            <div class="o_ap_history_dates">
+                                <span>موعد در لحظه لغو: <t t-esc="item.original_deadline_jalali"/></span>
+                                <span>تاریخ لغو: <t t-esc="item.cancellation_date_jalali"/></span>
+                            </div>
+                            <div class="o_ap_history_tag">
+                                لغوکننده: <t t-esc="item.cancelled_by_name"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <t t-elif="state.view === 'approvals'">
+                <t t-if="state.approvalsLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.pendingApprovals.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> هیچ درخواست تمدیدِ در انتظاری برای شما وجود ندارد
+                    </div>
+                </t>
+                <div class="o_ap_approvals_list" t-else="">
+                    <t t-foreach="state.pendingApprovals" t-as="req" t-key="req.id">
+                        <div class="o_ap_approval_row" dir="rtl">
+                            <div class="o_ap_approval_main" t-on-click="() => this.openRecord(req)">
+                                <div class="o_ap_approval_title">
+                                    <span t-esc="req.activity_summary"/>
+                                    <span class="o_ap_approval_res" t-esc="req.res_name"/>
+                                </div>
+                                <div class="o_ap_approval_by">
+                                    درخواست‌دهنده: <t t-esc="req.requested_by_name"/>
+                                </div>
+                                <div class="o_ap_approval_reason" t-esc="req.reason"/>
+                                <div class="o_ap_approval_dates">
+                                    <span>موعد فعلی: <t t-esc="req.previous_deadline_jalali"/></span>
+                                    <span>موعد پیشنهادی: <t t-esc="req.requested_deadline_jalali"/></span>
+                                </div>
+                            </div>
+                            <div class="o_ap_approval_actions">
+                                <button class="o_ap_act_btn o_ap_act_approve" t-on-click="() => this.approveRequest(req)">
+                                    <i class="fa fa-check"/> تأیید
+                                </button>
+                                <button class="o_ap_act_btn o_ap_act_reject" t-on-click="() => this.rejectRequest(req)">
+                                    <i class="fa fa-times"/> رد
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'quality_reviews'">
+                <t t-if="state.qualityLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.pendingQualityReviews.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> هیچ موردی در انتظار بررسی کیفیت وجود ندارد
+                    </div>
+                </t>
+                <div class="o_ap_approvals_list" t-else="">
+                    <t t-foreach="state.pendingQualityReviews" t-as="rev" t-key="rev.id">
+                        <div class="o_ap_approval_row" dir="rtl">
+                            <div class="o_ap_approval_main" t-on-click="() => this.openRecord(rev)">
+                                <div class="o_ap_approval_title">
+                                    <span t-esc="rev.activity_summary"/>
+                                    <span class="o_ap_approval_res" t-esc="rev.res_name"/>
+                                </div>
+                                <div class="o_ap_approval_by">
+                                    انجام‌دهنده: <t t-esc="rev.performed_by_name"/>
+                                    <t t-if="rev.completion_date_jalali">
+                                        — تاریخ انجام: <t t-esc="rev.completion_date_jalali"/>
+                                    </t>
+                                </div>
+                                <t t-if="rev.original_deadline_jalali">
+                                    <div class="o_ap_approval_dates">
+                                        <span>موعد مقرر: <t t-esc="rev.original_deadline_jalali"/></span>
+                                    </div>
+                                </t>
+                                <t t-if="rev.feedback">
+                                    <div class="o_ap_approval_reason">
+                                        بازخورد: <t t-esc="rev.feedback"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="o_ap_approval_actions">
+                                <button class="o_ap_act_btn o_ap_act_approve" t-on-click="() => this.approveQuality(rev)">
+                                    <i class="fa fa-check"/> تأیید کیفیت
+                                </button>
+                                <button class="o_ap_act_btn o_ap_act_reject" t-on-click="() => this.rejectQuality(rev)">
+                                    <i class="fa fa-times"/> رد کیفیت
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'rewards'">
+                <t t-if="state.rewardsLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.pendingRewards.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> هیچ پاداشی در انتظار تأیید نیست
+                    </div>
+                </t>
+                <div class="o_ap_approvals_list" t-else="">
+                    <t t-foreach="state.pendingRewards" t-as="reward" t-key="reward.id">
+                        <div class="o_ap_approval_row" dir="rtl">
+                            <div class="o_ap_approval_main">
+                                <div class="o_ap_approval_title">
+                                    <span t-esc="reward.description"/>
+                                </div>
+                                <div class="o_ap_approval_by">
+                                    برای: <t t-esc="reward.user_name"/> —
+                                    مبلغ پیشنهادی: <t t-esc="reward.amount"/>
+                                    <t t-esc="state.wallet ? state.wallet.currency_icon : ''"/>
+                                </div>
+                            </div>
+                            <div class="o_ap_approval_actions">
+                                <button class="o_ap_act_btn o_ap_act_approve" t-on-click="() => this.approveReward(reward)">
+                                    <i class="fa fa-check"/> تأیید و واریز
+                                </button>
+                                <button class="o_ap_act_btn o_ap_act_reject" t-on-click="() => this.rejectReward(reward)">
+                                    <i class="fa fa-times"/> رد
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'store'">
+                <t t-if="state.storeLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.storeItems.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-shopping-cart"/> فعلاً آیتمی توی فروشگاه نیست
+                    </div>
+                </t>
+                <div class="o_ap_store_grid" t-else="">
+                    <t t-foreach="state.storeItems" t-as="item" t-key="item.id">
+                        <div class="o_ap_store_card">
+                            <div class="o_ap_store_card_image">
+                                <img t-if="item.has_image"
+                                     t-attf-src="/web/image/activity.pulse.store.item/{{item.id}}/image"
+                                     t-att-alt="item.name"/>
+                                <i t-else="" class="fa fa-gift o_ap_store_card_image_placeholder"/>
+                            </div>
+                            <div class="o_ap_store_card_name" t-esc="item.name"/>
+                            <t t-if="item.description">
+                                <div class="o_ap_store_card_desc" t-esc="item.description"/>
+                            </t>
+                            <div class="o_ap_store_card_price">
+                                <span t-esc="item.price"/>
+                                <span t-esc="state.wallet ? state.wallet.currency_icon : ''"/>
+                            </div>
+                            <button class="o_ap_store_buy_btn" t-on-click="() => this.purchaseItem(item)">
+                                <i class="fa fa-shopping-cart"/> خرید
+                            </button>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <t t-elif="state.view === 'store_orders'">
+                <t t-if="state.ordersLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.pendingOrders.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-check-circle"/> سفارش در انتظاری نیست
+                    </div>
+                </t>
+                <div class="o_ap_approvals_list" t-else="">
+                    <t t-foreach="state.pendingOrders" t-as="order" t-key="order.id">
+                        <div class="o_ap_approval_row" dir="rtl">
+                            <div class="o_ap_approval_main">
+                                <div class="o_ap_approval_title">
+                                    <span t-esc="order.item_name"/>
+                                </div>
+                                <div class="o_ap_approval_by">
+                                    خریدار: <t t-esc="order.user_name"/> —
+                                    مبلغ: <t t-esc="order.price_paid"/>
+                                    <t t-esc="state.wallet ? state.wallet.currency_icon : ''"/>
+                                </div>
+                            </div>
+                            <div class="o_ap_approval_actions">
+                                <button class="o_ap_act_btn o_ap_act_approve" t-on-click="() => this.fulfillOrder(order)">
+                                    <i class="fa fa-check"/> تکمیل شد
+                                </button>
+                                <button class="o_ap_act_btn o_ap_act_reject" t-on-click="() => this.rejectOrder(order)">
+                                    <i class="fa fa-times"/> رد و بازگشت وجه
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <t t-elif="state.view === 'my_orders'">
+                <t t-if="state.myOrdersLoading">
+                    <div class="o_ap_panel_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.myOrders.length">
+                    <div class="o_ap_panel_empty">
+                        <i class="fa fa-shopping-cart"/> هنوز سفارشی از فروشگاه ثبت نکردید
+                    </div>
+                </t>
+                <div class="o_ap_approvals_list" t-else="">
+                    <t t-foreach="state.myOrders" t-as="order" t-key="order.id">
+                        <div class="o_ap_approval_row" dir="rtl">
+                            <div class="o_ap_approval_main">
+                                <div class="o_ap_approval_title">
+                                    <span t-esc="order.item_name"/>
+                                    <span t-attf-class="o_ap_badge o_ap_badge_{{order.color}}"
+                                          t-esc="order.state_label"/>
+                                </div>
+                                <div class="o_ap_approval_by">
+                                    مبلغ: <t t-esc="order.price_paid"/>
+                                    <t t-esc="state.wallet ? state.wallet.currency_icon : ''"/>
+                                    — تاریخ خرید: <t t-esc="order.create_date_jalali"/>
+                                    <t t-if="order.decision_date_jalali">
+                                        — تاریخ تصمیم: <t t-esc="order.decision_date_jalali"/>
+                                    </t>
+                                </div>
+                                <t t-if="order.note">
+                                    <div class="o_ap_approval_by">یادداشت: <t t-esc="order.note"/></div>
+                                </t>
+                            </div>
+                            <div class="o_ap_approval_actions">
+                                <t t-if="order.can_print_receipt">
+                                    <button class="o_ap_act_btn" t-on-click="() => this.printReceipt(order)">
+                                        <i class="fa fa-file-pdf-o"/> چاپ رسید
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="activity_pulse.PanelFeedbackDialog">
+        <Dialog title="'ثبت انجام‌شدن اکتیویتی'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    لطفاً توضیح کوتاهی درباره نتیجه یا اقدام انجام‌شده برای
+                    «<t t-esc="props.activity.res_name"/>» بنویسید:
+                </p>
+                <textarea t-ref="feedbackInput"
+                          t-model="state.feedback"
+                          class="form-control"
+                          rows="3"
+                          placeholder="مثلاً: با مشتری تماس گرفته شد و..."/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirmClick">
+                    <i class="fa fa-check"/> تایید و ثبت
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="activity_pulse.ExtensionRequestDialog">
+        <Dialog title="'درخواست زمان اضافه'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    درخواست تمدید موعد برای «<t t-esc="props.activity.res_name"/>» به سازنده‌ی
+                    این اکتیویتی ارسال می‌شود.
+                </p>
+                <label>موعد پیشنهادی جدید:</label>
+                <JalaliDateInput value="state.newDate" onChange="(newDate) => this.onDateChange(newDate)"/>
+                <label class="mt-2 d-block">دلیل درخواست:</label>
+                <textarea t-model="state.reason"
+                          class="form-control"
+                          rows="3"
+                          placeholder="مثلاً: به‌خاطر انتظار برای تأیید مشتری، این کار به تاخیر افتاده..."/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirmClick">
+                    <i class="fa fa-paper-plane"/> ارسال درخواست
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="activity_pulse.RejectRequestDialog">
+        <Dialog title="'رد درخواست تمدید'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>در صورت تمایل، دلیل رد درخواست را بنویسید (اختیاری):</p>
+                <textarea t-model="state.note"
+                          class="form-control"
+                          rows="3"
+                          placeholder="مثلاً: موعد این کار قابل تغییر نیست..."/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-danger" t-on-click="onConfirmClick">
+                    <i class="fa fa-times"/> رد درخواست
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+    <t t-name="activity_pulse.RejectQualityDialog">
+        <Dialog title="'رد کیفیت انجام کار'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    لطفاً دلیل رد کیفیت را بنویسید. یک اکتیویتی جدید با همان مشخصات
+                    و موعد جدیدی که مشخص می‌کنید، برای انجامِ دوباره ساخته می‌شود.
+                </p>
+                <label>دلیل رد:</label>
+                <textarea t-model="state.reason"
+                          class="form-control mb-2"
+                          rows="3"
+                          placeholder="مثلاً: کیفیت گزارش کافی نبود، لطفاً..."/>
+                <label class="d-block">موعد جدید برای انجامِ دوباره:</label>
+                <JalaliDateInput value="state.newDeadline" onChange="(newDate) => this.onDateChange(newDate)"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-danger" t-on-click="onConfirmClick">
+                    <i class="fa fa-times"/> رد و ایجاد اکتیویتی جدید
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+    <t t-name="activity_pulse.ApproveRewardDialog">
+        <Dialog title="'تأیید و واریز پاداش'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    مبلغ پاداش برای «<t t-esc="props.reward.description"/>» رو تأیید یا در صورت نیاز ویرایش کن:
+                </p>
+                <label>مبلغ (<t t-esc="props.currencyName"/> <t t-esc="props.currencyIcon"/>):</label>
+                <input type="number" class="form-control" t-model="state.amount" min="1"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirmClick">
+                    <i class="fa fa-check"/> تأیید و واریز
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="activity_pulse.ManualDepositDialog">
+        <Dialog title="'واریز سکه به کاربر'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    مقدار دلخواهی سکه، بدون نیاز به اکتیویتی یا بررسی کیفیت، مستقیم به
+                    کیف‌پول کاربر واریز می‌شه.
+                </p>
+                <label>کاربر:</label>
+                <select class="form-select" t-on-change="onDepositUserChange">
+                    <t t-foreach="props.users" t-as="u" t-key="u.id">
+                        <option t-att-value="u.id" t-att-selected="state.userId === u.id" t-esc="u.name"/>
+                    </t>
+                </select>
+                <label class="mt-2 d-block">مقدار (<t t-esc="props.currencyName"/> <t t-esc="props.currencyIcon"/>):</label>
+                <input type="number" class="form-control" t-model="state.amount" min="1"/>
+                <label class="mt-2 d-block">توضیح (اختیاری):</label>
+                <textarea t-model="state.description"
+                          class="form-control"
+                          rows="2"
+                          placeholder="مثلاً: قدردانی از همکاری در پروژه X"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirmClick">
+                    <i class="fa fa-money"/> واریز
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="activity_pulse.SimpleReasonDialog">
+        <Dialog title="props.title" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p t-esc="props.message"/>
+                <textarea t-model="state.reason"
+                          class="form-control"
+                          rows="3"
+                          placeholder="دلیل (اختیاری)..."/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-danger" t-on-click="onConfirmClick">
+                    <i class="fa fa-check"/> تأیید
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>
