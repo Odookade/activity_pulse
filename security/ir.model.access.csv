@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_activity_pulse_line_user,activity.pulse.line.user,model_activity_pulse_line,base.group_user,1,0,0,0
+access_activity_pulse_history_user,activity.pulse.history.user,model_activity_pulse_history,base.group_user,1,0,0,0
+access_activity_pulse_extension_user,activity.pulse.extension.request.user,model_activity_pulse_extension_request,base.group_user,1,1,1,0
+access_activity_pulse_cancellation_user,activity.pulse.cancellation.user,model_activity_pulse_cancellation,base.group_user,1,0,0,0
+access_activity_pulse_quality_review_user,activity.pulse.quality_review.user,model_activity_pulse_quality_review,base.group_user,1,1,1,0
+access_activity_pulse_category_manager,activity.pulse.category.manager,model_activity_pulse_category,group_activity_pulse_manager,1,1,1,1
+access_activity_pulse_wallet_user,activity.pulse.wallet.transaction.user,model_activity_pulse_wallet_transaction,base.group_user,1,0,0,0
+access_activity_pulse_wallet_manager,activity.pulse.wallet.transaction.manager,model_activity_pulse_wallet_transaction,group_activity_pulse_manager,1,1,1,0
+access_activity_pulse_store_item_user,activity.pulse.store.item.user,model_activity_pulse_store_item,base.group_user,1,0,0,0
+access_activity_pulse_store_item_manager,activity.pulse.store.item.manager,model_activity_pulse_store_item,group_activity_pulse_manager,1,1,1,1
+access_activity_pulse_store_order_user,activity.pulse.store.order.user,model_activity_pulse_store_order,base.group_user,1,0,0,0
+access_activity_pulse_store_order_manager,activity.pulse.store.order.manager,model_activity_pulse_store_order,group_activity_pulse_manager,1,1,1,0
