@@ -1,0 +1,905 @@
+.o_activity_pulse_panel {
+    direction: rtl;
+    text-align: right;
+    font-family: inherit;
+    box-sizing: border-box;
+
+    // خودِ این المان، کل ناحیه‌ی اسکرول‌شونده‌ست (بدون margin/max-width) تا
+    // موس هرجای صفحه که باشه (نه فقط دقیقاً روی کارت‌ها)، اسکرول رو حس کنه.
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 24px 20px 40px;
+
+    // عرض محدود و وسط‌چین فقط برای محتوای داخلی اعمال می‌شه، نه برای خودِ
+    // ناحیه‌ی اسکرول — این‌جوری حاشیه‌های کناری هم بخشی از باکس اسکرول‌شونده
+    // می‌مونن.
+    > * {
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .o_app_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+
+        .o_app_title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            // برای هم‌ترازی عمودی با ردیف اول دکمه‌ها وقتی هدر چند ردیفی می‌شه
+            padding-top: 6px;
+        }
+
+        // حداکثر ۴ دکمه در هر ردیف؛ بقیه خودکار به ردیف بعدی می‌رن
+        .o_app_header_actions {
+            display: grid;
+            grid-template-columns: repeat(4, max-content);
+            gap: 8px;
+            justify-content: start;
+        }
+
+        .o_app_back_btn {
+            position: relative;
+        }
+
+        .o_ap_approvals_badge {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 17px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .o_app_back_btn {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.12s ease;
+
+            &:hover { background: #f3f4f6; }
+        }
+    }
+
+    .o_ap_panel_loading, .o_ap_panel_empty {
+        text-align: center;
+        padding: 60px 12px;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    // ============ تب‌های دسته‌بندی ============
+    .o_ap_category_toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .o_ap_category_tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_ap_cat_tab {
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        transition: background 0.12s ease, color 0.12s ease;
+
+        &.active {
+            background: #111827;
+            color: #fff;
+            border-color: #111827;
+        }
+
+        &:hover:not(.active) {
+            background: #f3f4f6;
+        }
+    }
+
+    .o_ap_toolbar_actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .o_ap_search_box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 6px 12px;
+        min-width: 190px;
+
+        .fa-search {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        input {
+            border: none;
+            outline: none;
+            font-size: 12.5px;
+            font-family: inherit;
+            color: #111827;
+            background: transparent;
+            flex: 1;
+            direction: rtl;
+            text-align: right;
+
+            &::placeholder { color: #9ca3af; }
+        }
+
+        .o_ap_search_clear {
+            color: #9ca3af;
+            font-size: 12px;
+            cursor: pointer;
+
+            &:hover { color: #6b7280; }
+        }
+    }
+
+    .o_ap_manage_categories_btn {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 7px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.12s ease;
+
+        &:hover { background: #f3f4f6; }
+    }
+
+    // ============ گرید باکس‌های تیم ============
+    .o_ap_team_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 14px;
+    }
+
+    .o_ap_member_card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 18px 14px;
+        text-align: center;
+        cursor: pointer;
+        border: 1px solid #eef0f2;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: transform 0.14s ease, box-shadow 0.14s ease;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.09);
+        }
+
+        .o_ap_member_avatar {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .o_ap_member_name {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .o_ap_member_badges {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+    }
+
+    .o_ap_badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+
+        &.o_ap_badge_red { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+        &.o_ap_badge_yellow { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+        &.o_ap_badge_green { background: rgba(34, 197, 94, 0.14); color: #15803d; }
+    }
+
+    // ============ لیست جزئیات ============
+    .o_ap_detail_list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .o_ap_detail_row {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #eef0f2;
+        border-right: 4px solid #d1d5db;
+        padding: 12px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+
+        &.o_ap_row_red { border-right-color: #ef4444; }
+        &.o_ap_row_yellow { border-right-color: #f59e0b; }
+        &.o_ap_row_green { border-right-color: #22c55e; }
+
+        .o_ap_detail_main {
+            flex: 1 1 220px;
+            min-width: 0;
+            cursor: pointer;
+
+            .o_ap_detail_title {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 700;
+                font-size: 13.5px;
+                color: #111827;
+
+                .o_ap_dot {
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 50%;
+                    background: #9ca3af;
+                    flex-shrink: 0;
+                }
+
+                .o_ap_detail_type {
+                    font-size: 11px;
+                    font-weight: 500;
+                    color: #6b7280;
+                }
+            }
+
+            .o_ap_detail_summary {
+                font-size: 12px;
+                color: #4b5563;
+                margin-top: 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        &.o_ap_row_red .o_ap_dot { background: #ef4444; }
+        &.o_ap_row_yellow .o_ap_dot { background: #f59e0b; }
+        &.o_ap_row_green .o_ap_dot { background: #22c55e; }
+
+        .o_ap_detail_meta {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+
+            .o_ap_deadline_edit {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+                color: #374151;
+
+                label { font-weight: 600; }
+
+                input[type="date"] {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 3px 6px;
+                    font-size: 12px;
+                    direction: ltr;
+                }
+
+                .o_ap_jalali_hint {
+                    color: #9ca3af;
+                    font-size: 11px;
+                }
+
+                .o_ap_deadline_readonly {
+                    color: #374151;
+                    font-weight: 600;
+                    direction: ltr;
+                }
+            }
+
+            .o_ap_delay_tag {
+                font-size: 11px;
+                font-weight: 700;
+                color: #ef4444;
+            }
+        }
+
+        .o_ap_detail_actions {
+            flex: 0 0 auto;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+
+            .o_ap_act_done {
+                background: rgba(34, 197, 94, 0.12);
+                color: #15803d;
+                &:hover { background: #22c55e; color: #fff; }
+            }
+
+            .o_ap_act_followup {
+                background: rgba(59, 130, 246, 0.12);
+                color: #1d4ed8;
+                &:hover { background: #3b82f6; color: #fff; }
+            }
+
+            .o_ap_act_sms {
+                background: rgba(147, 51, 234, 0.1);
+                color: #7e22ce;
+                &:hover { background: #9333ea; color: #fff; }
+            }
+        }
+    }
+
+    // استایل پایه‌ی مشترک همه‌ی دکمه‌های کوچیک عملیاتی (انجام‌شد/پیگیری/پیامک/تأیید/رد/تمدید)
+    .o_ap_act_btn {
+        border: none;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        transition: background 0.12s ease, color 0.12s ease;
+    }
+}
+
+.o_ap_feedback_dialog {
+    direction: rtl;
+    text-align: right;
+    font-family: inherit;
+
+    p {
+        font-size: 13px;
+        color: #374151;
+    }
+}
+
+// ============ ورودی تاریخ شمسی ============
+.o_ap_jalali_date_input {
+    display: inline-flex;
+    direction: rtl;
+    gap: 4px;
+
+    select {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 3px 4px;
+        font-size: 11.5px;
+        font-family: inherit;
+        color: #374151;
+        background: #fff;
+        direction: rtl;
+    }
+
+    .o_ap_jdi_day { width: 46px; }
+    .o_ap_jdi_month { width: 78px; }
+    .o_ap_jdi_year { width: 62px; }
+}
+
+// ============ تمدید موعد ============
+.o_activity_pulse_panel {
+    .o_ap_extended_tag {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #7c3aed;
+        background: rgba(124, 58, 237, 0.1);
+        padding: 2px 8px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-inline-start: 6px;
+    }
+
+    .o_ap_pending_ext_tag {
+        font-size: 11px;
+        font-weight: 600;
+        color: #b45309;
+        background: rgba(245, 158, 11, 0.12);
+        padding: 5px 10px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .o_ap_act_extend {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+        &:hover { background: #7c3aed; color: #fff; }
+    }
+
+    .o_ap_history_ext_note {
+        flex-basis: 100%;
+        font-size: 11px;
+        color: #7c3aed;
+        background: rgba(124, 58, 237, 0.06);
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .o_ap_history_quality_note {
+        flex-basis: 100%;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
+        background: rgba(107, 114, 128, 0.1);
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .o_ap_approvals_list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .o_ap_approval_row {
+        background: #fff;
+        border: 1px solid #eef0f2;
+        border-right: 4px solid #f59e0b;
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+        .o_ap_approval_main {
+            flex: 1 1 260px;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .o_ap_approval_title {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #111827;
+            display: flex;
+            gap: 8px;
+
+            .o_ap_approval_res {
+                font-weight: 500;
+                font-size: 11.5px;
+                color: #6b7280;
+            }
+        }
+
+        .o_ap_approval_by {
+            font-size: 11.5px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .o_ap_approval_reason {
+            font-size: 12.5px;
+            color: #374151;
+            margin-top: 6px;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        .o_ap_approval_dates {
+            display: flex;
+            gap: 14px;
+            font-size: 11.5px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .o_ap_approval_actions {
+            flex: 0 0 auto;
+            display: flex;
+            gap: 8px;
+
+            .o_ap_act_approve {
+                background: rgba(34, 197, 94, 0.12);
+                color: #15803d;
+                &:hover { background: #22c55e; color: #fff; }
+            }
+
+            .o_ap_act_reject {
+                background: rgba(239, 68, 68, 0.12);
+                color: #dc2626;
+                &:hover { background: #ef4444; color: #fff; }
+            }
+        }
+    }
+}
+.o_activity_pulse_panel {
+    .o_ap_kpi_dashboard {
+        background: #fff;
+        border: 1px solid #eef0f2;
+        border-radius: 16px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .o_ap_kpi_toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .o_ap_kpi_period_toggle {
+        display: inline-flex;
+        background: #f3f4f6;
+        border-radius: 10px;
+        padding: 3px;
+        gap: 2px;
+
+        .o_ap_period_btn {
+            border: none;
+            background: transparent;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #6b7280;
+            transition: background 0.12s ease, color 0.12s ease;
+
+            &.active {
+                background: #111827;
+                color: #fff;
+            }
+        }
+    }
+
+    .o_ap_kpi_selectors {
+        display: flex;
+        gap: 8px;
+
+        select {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 12.5px;
+            color: #374151;
+            font-family: inherit;
+            background: #fff;
+        }
+    }
+
+    .o_ap_kpi_loading {
+        text-align: center;
+        padding: 24px;
+        color: #9ca3af;
+        font-size: 13px;
+    }
+
+    .o_ap_kpi_cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .o_ap_kpi_card {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 14px 12px;
+        text-align: center;
+
+        .o_ap_kpi_value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            direction: ltr;
+        }
+
+        .o_ap_kpi_label {
+            font-size: 11.5px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        &.o_ap_kpi_good .o_ap_kpi_value { color: #15803d; }
+        &.o_ap_kpi_bad .o_ap_kpi_value { color: #dc2626; }
+
+        .o_ap_kpi_mini_badges {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+    }
+}
+.o_activity_pulse_panel {
+    .o_ap_history_summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border: 1px solid #eef0f2;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+        .o_ap_history_avg {
+            font-size: 16px;
+            font-weight: 700;
+
+            &.o_ap_avg_late { color: #dc2626; }
+            &.o_ap_avg_early { color: #15803d; }
+            &.o_ap_avg_ontime { color: #374151; }
+        }
+
+        .o_ap_history_count {
+            font-size: 12px;
+            color: #6b7280;
+        }
+    }
+
+    .o_ap_history_list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .o_ap_history_row {
+        background: #fff;
+        border: 1px solid #eef0f2;
+        border-right: 4px solid #d1d5db;
+        border-radius: 12px;
+        padding: 10px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12.5px;
+        cursor: pointer;
+
+        &.o_ap_hrow_late { border-right-color: #ef4444; }
+        &.o_ap_hrow_early { border-right-color: #22c55e; }
+        &.o_ap_hrow_ontime { border-right-color: #9ca3af; }
+        &.o_ap_hrow_quality_rejected {
+            border-right-color: #9ca3af;
+            background: #f3f4f6;
+            opacity: 0.72;
+
+            .o_ap_history_main span,
+            .o_ap_history_summary,
+            .o_ap_history_dates,
+            .o_ap_history_tag {
+                color: #6b7280 !important;
+            }
+        }
+
+        .o_ap_history_main {
+            font-weight: 700;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .o_ap_history_type {
+                font-size: 11px;
+                font-weight: 500;
+                color: #6b7280;
+            }
+        }
+
+        .o_ap_history_dates {
+            display: flex;
+            gap: 12px;
+            color: #6b7280;
+            font-size: 11.5px;
+        }
+
+        .o_ap_history_summary {
+            flex-basis: 100%;
+            font-size: 12px;
+            color: #4b5563;
+            margin-top: 2px;
+        }
+
+        .o_ap_history_tag {
+            font-weight: 700;
+            font-size: 12px;
+            color: #374151;
+        }
+
+        &.o_ap_hrow_late .o_ap_history_tag { color: #dc2626; }
+        &.o_ap_hrow_early .o_ap_history_tag { color: #15803d; }
+    }
+}
+
+// ============ کیف پول و فروشگاه ============
+.o_activity_pulse_panel {
+    .o_ap_wallet_badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        border-radius: 999px;
+        padding: 7px 16px;
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .o_ap_wallet_icon {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .o_ap_wallet_balance {
+            font-size: 15px;
+            font-weight: 800;
+            color: #78350f;
+            direction: ltr;
+        }
+
+        .o_ap_wallet_name {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: rgba(120, 53, 15, 0.7);
+        }
+    }
+
+    .o_ap_store_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 14px;
+    }
+
+    .o_ap_store_card {
+        background: #fff;
+        border: 1px solid #eef0f2;
+        border-radius: 16px;
+        padding: 18px 16px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+
+        .o_ap_store_card_image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .o_ap_store_card_image_placeholder {
+                font-size: 28px;
+                color: #d1d5db;
+            }
+        }
+
+        .o_ap_store_card_name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .o_ap_store_card_desc {
+            font-size: 12px;
+            color: #6b7280;
+            min-height: 2.2em;
+        }
+
+        .o_ap_store_card_price {
+            font-size: 17px;
+            font-weight: 800;
+            color: #b45309;
+            direction: ltr;
+            margin: 6px 0 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .o_ap_store_buy_btn {
+            width: 100%;
+            background: #111827;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 0;
+            font-size: 12.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.12s ease;
+
+            &:hover { background: #b45309; }
+        }
+    }
+}
