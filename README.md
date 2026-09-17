@@ -1,5 +1,4 @@
-# Activity Pulse — فاز ۱
-
+# Activity Pulse
 ## نصب
 1. پوشه `activity_pulse` رو داخل مسیر addons سرور اودو کپی کنید.
 2. سرور رو با فلگ `-u activity_pulse` ری‌استارت کنید یا از منوی Apps → Update Apps List → جستجوی «Activity Pulse» → نصب.
