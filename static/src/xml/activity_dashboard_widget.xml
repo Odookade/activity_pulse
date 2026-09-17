@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="activity_pulse.ActivityDashboardWidget">
+        <div class="o_activity_pulse_widget" dir="rtl">
+
+            <div class="o_ap_clock_block">
+                <div class="o_ap_time" t-esc="this.jalaliNow.timeStr"/>
+                <div class="o_ap_date" t-esc="this.jalaliNow.dateStr"/>
+                <div class="o_ap_mini_divider"/>
+                <div class="o_ap_badges">
+                    <span class="o_ap_badge o_ap_badge_red" title="دارای تاخیر">
+                        <i class="fa fa-exclamation-circle"/> <t t-esc="this.overdueCount"/>
+                    </span>
+                    <span class="o_ap_badge o_ap_badge_yellow" title="امروز">
+                        <i class="fa fa-clock-o"/> <t t-esc="this.todayCount"/>
+                    </span>
+                    <span class="o_ap_badge o_ap_badge_green" title="برنامه‌ریزی‌شده">
+                        <i class="fa fa-calendar"/> <t t-esc="this.plannedCount"/>
+                    </span>
+                </div>
+            </div>
+
+            <div class="o_ap_divider"/>
+
+            <div class="o_ap_cards_area">
+                <t t-if="state.loading">
+                    <div class="o_ap_loading">
+                        <i class="fa fa-circle-o-notch fa-spin"/> در حال بارگذاری...
+                    </div>
+                </t>
+                <t t-elif="!state.activities.length">
+                    <div class="o_ap_empty">
+                        <i class="fa fa-check-circle"/> هیچ اکتیویتی بازی ندارید
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="o_ap_cards_scroll">
+                        <t t-foreach="state.activities" t-as="activity" t-key="activity.id">
+                            <div t-attf-class="o_ap_card o_ap_card_{{activity.color}}"
+                                 dir="rtl"
+                                 t-on-click="() => this.openRecord(activity)">
+                                <span class="o_ap_card_dot"/>
+                                <div class="o_ap_card_summary" t-esc="activity.summary" t-att-title="activity.summary"/>
+
+                                <div class="o_ap_card_footer">
+                                    <div class="o_ap_card_meta" dir="rtl">
+                                        <span class="o_ap_card_date" t-esc="this.toFa(activity.date_deadline_jalali)"/>
+                                        <t t-if="activity.delay_days &gt; 0">
+                                            <span class="o_ap_card_delay">
+                                                <t t-esc="this.toFa(activity.delay_days)"/> روز تاخیر
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="activity_pulse.ActivityFeedbackDialog">
+        <Dialog title="'ثبت انجام‌شدن اکتیویتی'" size="'sm'">
+            <div class="o_ap_feedback_dialog" dir="rtl">
+                <p>
+                    لطفاً توضیح کوتاهی درباره نتیجه یا اقدام انجام‌شده برای
+                    «<t t-esc="props.activity.res_name"/>» بنویسید:
+                </p>
+                <textarea t-ref="feedbackInput"
+                          t-model="state.feedback"
+                          class="form-control"
+                          rows="3"
+                          placeholder="مثلاً: با مشتری تماس گرفته شد و..."/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirmClick">
+                    <i class="fa fa-check"/> تایید و ثبت
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    انصراف
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>
