@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- گروه امنیتی: مدیرانی که مجازند اکتیویتی همه کاربران رو ببینن -->
+        <record id="group_activity_pulse_manager" model="res.groups">
+            <field name="name">مدیر پایش اکتیویتی</field>
+            <field name="category_id" ref="base.module_category_productivity"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+            <field name="comment">
+                کاربرانی که عضو این گروه باشن، در پنل «پایش اکتیویتی» می‌تونن اکتیویتی‌های
+                باز همه کاربران سیستم رو ببینن. کاربران عادی فقط اکتیویتی‌های خودشون رو می‌بینن.
+            </field>
+        </record>
+
+        <!-- محدودیت پیش‌فرض: هر کاربر عادی فقط ردیف‌های خودش رو می‌بینه -->
+        <record id="rule_activity_pulse_line_own" model="ir.rule">
+            <field name="name">Activity Pulse: فقط اکتیویتی‌های خود کاربر</field>
+            <field name="model_id" ref="model_activity_pulse_line"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- مدیران این محدودیت رو ندارن و همه رکوردها رو می‌بینن -->
+        <record id="rule_activity_pulse_line_manager" model="ir.rule">
+            <field name="name">Activity Pulse: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_line"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- همون منطق برای مدل تاریخچه -->
+        <record id="rule_activity_pulse_history_own" model="ir.rule">
+            <field name="name">Activity Pulse History: فقط تاریخچه خود کاربر</field>
+            <field name="model_id" ref="model_activity_pulse_history"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_history_manager" model="ir.rule">
+            <field name="name">Activity Pulse History: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_history"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!--
+            محدودیت سراسری روی خودِ mail.activity: ویرایش (write) و حذف خام (unlink)
+            فقط برای سازنده اکتیویتی یا مدیر مجازه. عمداً روی «read» و «create» اعمال
+            نمی‌شه، پس همه همچنان می‌تونن اکتیویتی‌های خودشون رو ببینن و اکتیویتی جدید
+            برای دیگران بسازن. «انجام شد» (action_feedback) از این محدودیت مستثناست
+            و همیشه برای کاربر مسئول ممکنه (جزئیاتش در models/mail_activity.py).
+
+            ⚠️ این یک تغییر سراسریه که رو کل اودو اثر می‌ذاره (نه فقط این ماژول)،
+            چون یعنی مثلاً توی چت‌تر یک لید CRM یا تسک پروژه هم، فقط سازنده/مدیر
+            می‌تونه اکتیویتی رو ویرایش یا لغو (بدون بازخورد) کنه.
+        -->
+        <record id="rule_mail_activity_write_unlink_creator_only" model="ir.rule">
+            <field name="name">Activity Pulse: ویرایش/لغو اکتیویتی فقط توسط سازنده</field>
+            <field name="model_id" ref="mail.model_mail_activity"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read">0</field>
+            <field name="perm_write">1</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">1</field>
+        </record>
+
+        <record id="rule_mail_activity_write_unlink_manager_full" model="ir.rule">
+            <field name="name">Activity Pulse: ویرایش/لغو کامل برای مدیر</field>
+            <field name="model_id" ref="mail.model_mail_activity"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+            <field name="perm_read">0</field>
+            <field name="perm_write">1</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">1</field>
+        </record>
+
+        <!-- درخواست تمدید موعد: فقط درخواست‌دهنده، تأییدکننده، یا مدیر -->
+        <record id="rule_activity_pulse_extension_own" model="ir.rule">
+            <field name="name">Activity Pulse Extension: فقط درخواست‌دهنده/تأییدکننده</field>
+            <field name="model_id" ref="model_activity_pulse_extension_request"/>
+            <field name="domain_force">['|', ('requested_by', '=', user.id), ('approver_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_extension_manager" model="ir.rule">
+            <field name="name">Activity Pulse Extension: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_extension_request"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- لغو اکتیویتی: فقط خودِ کاربرِ مسئول یا مدیر می‌بینه -->
+        <record id="rule_activity_pulse_cancellation_own" model="ir.rule">
+            <field name="name">Activity Pulse Cancellation: فقط خود کاربر</field>
+            <field name="model_id" ref="model_activity_pulse_cancellation"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_cancellation_manager" model="ir.rule">
+            <field name="name">Activity Pulse Cancellation: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_cancellation"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- بررسی کیفیت: فقط انجام‌دهنده، محول‌کننده، یا مدیر -->
+        <record id="rule_activity_pulse_quality_review_own" model="ir.rule">
+            <field name="name">Activity Pulse Quality Review: فقط انجام‌دهنده/محول‌کننده</field>
+            <field name="model_id" ref="model_activity_pulse_quality_review"/>
+            <field name="domain_force">['|', ('performed_by', '=', user.id), ('approver_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_quality_review_manager" model="ir.rule">
+            <field name="name">Activity Pulse Quality Review: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_quality_review"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- مدیران سیستم (Settings/Administrator) هم به‌صورت پیش‌فرض دسترسی کامل دارن -->
+        <record id="rule_activity_pulse_line_settings" model="ir.rule">
+            <field name="name">Activity Pulse: دسترسی کامل مدیر سیستم</field>
+            <field name="model_id" ref="model_activity_pulse_line"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        </record>
+
+        <!-- کیف پول: هرکس فقط تراکنش‌های خودش رو می‌بینه، مدیر همه رو -->
+        <record id="rule_activity_pulse_wallet_own" model="ir.rule">
+            <field name="name">Activity Pulse Wallet: فقط تراکنش‌های خود کاربر</field>
+            <field name="model_id" ref="model_activity_pulse_wallet_transaction"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_wallet_manager" model="ir.rule">
+            <field name="name">Activity Pulse Wallet: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_wallet_transaction"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- سفارش‌های فروشگاه: هرکس فقط سفارش‌های خودش، مدیر همه -->
+        <record id="rule_activity_pulse_store_order_own" model="ir.rule">
+            <field name="name">Activity Pulse Store Order: فقط سفارش‌های خود کاربر</field>
+            <field name="model_id" ref="model_activity_pulse_store_order"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_activity_pulse_store_order_manager" model="ir.rule">
+            <field name="name">Activity Pulse Store Order: دسترسی کامل مدیر</field>
+            <field name="model_id" ref="model_activity_pulse_store_order"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+        <!-- عضویت خودکار کاربر ادمین پیش‌فرض در گروه مدیر، تا از همون ابتدا پنل کامل قابل تست باشه -->
+        <record id="base.user_admin" model="res.users">
+            <field name="groups_id" eval="[(4, ref('group_activity_pulse_manager'))]"/>
+        </record>
+
+    </data>
+</odoo>
